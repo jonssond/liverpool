@@ -1,5 +1,7 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import type { Vinyl } from '../../mockData';
+import Button from '../../components/Button';
 
 interface StorefrontProps {
   vinyls: Vinyl[];
@@ -21,10 +23,10 @@ export default function Storefront({ vinyls, onAddToCart }: StorefrontProps) {
   });
 
   return (
-    <div className="space-y-8 font-sans">
+    <div className="space-y-8 font-sans animate-in fade-in duration-200">
       {/* Hero Banner */}
-      <div className="relative rounded-3xl overflow-hidden bg-vinyl-black p-8 md:p-12 border border-faded-olive/20 shadow-xl flex flex-col md:flex-row justify-between items-center gap-8">
-        <div className="space-y-4 max-w-xl text-left">
+      <div className="relative rounded-3xl overflow-hidden bg-vinyl-black p-8 md:p-12 border border-faded-olive/20 shadow-xl flex flex-col md:flex-row justify-between items-center gap-8 text-left">
+        <div className="space-y-4 max-w-xl">
           <span className="px-3.5 py-1 rounded-full bg-warm-amber/10 text-warm-amber border border-warm-amber/20 font-bold text-xs uppercase tracking-widest">
             Curadoria Exclusiva
           </span>
@@ -56,33 +58,33 @@ export default function Storefront({ vinyls, onAddToCart }: StorefrontProps) {
       {/* Filter and Search controls */}
       <div className="flex flex-col md:flex-row gap-4 justify-between items-center bg-white/75 p-4 rounded-2xl border border-faded-olive/20 shadow-sm">
         {/* Search */}
-        <div className="relative w-full md:w-80">
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={e => setSearchQuery(e.target.value)}
-            placeholder="Pesquisar por título ou artista..."
-            className="w-full pl-10 pr-4 py-2 text-sm text-vinyl-black bg-paper-white border border-faded-olive/40 rounded-xl focus:outline-none focus:border-warm-amber transition placeholder-faded-olive/60"
-          />
-          <svg className="absolute left-3.5 top-3 w-4 h-4 text-faded-olive/60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
+        <div className="relative w-full md:w-80 text-left">
+          <label className="text-xs font-bold text-faded-olive block mb-1">Pesquisar Catálogo</label>
+          <div className="relative">
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              placeholder="Pesquisar por título ou artista..."
+              className="w-full pl-10 pr-4 py-2 text-sm text-vinyl-black bg-paper-white border border-faded-olive/40 rounded-xl focus:outline-none focus:border-warm-amber transition placeholder-faded-olive/60"
+            />
+            <svg className="absolute left-3.5 top-3 w-4 h-4 text-faded-olive/60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
         </div>
 
         {/* Genres */}
-        <div className="flex flex-wrap gap-2 justify-center">
+        <div className="flex flex-wrap gap-2 justify-center pt-5">
           {genres.map(genre => (
-            <button
+            <Button
               key={genre}
               onClick={() => setSelectedGenre(genre)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer border ${
-                selectedGenre === genre
-                  ? 'bg-faded-olive text-paper-white border-faded-olive'
-                  : 'bg-transparent text-faded-olive border-faded-olive/40 hover:border-faded-olive hover:bg-faded-olive/5'
-              }`}
+              variant={selectedGenre === genre ? 'secondary' : 'outline'}
+              size="sm"
             >
               {genre}
-            </button>
+            </Button>
           ))}
         </div>
       </div>
@@ -94,8 +96,11 @@ export default function Storefront({ vinyls, onAddToCart }: StorefrontProps) {
             key={vinyl.id}
             className="bg-white/75 border border-faded-olive/20 rounded-3xl overflow-hidden shadow-sm hover:shadow-md transition duration-300 flex flex-col justify-between group"
           >
-            {/* Cover photo */}
-            <div className="relative pt-[100%] bg-black overflow-hidden select-none">
+            {/* Cover photo (Link to details) */}
+            <Link 
+              to={`/item/${vinyl.id}`}
+              className="relative pt-[100%] bg-black overflow-hidden select-none block"
+            >
               <img
                 src={vinyl.coverUrl}
                 alt={vinyl.title}
@@ -113,13 +118,13 @@ export default function Storefront({ vinyls, onAddToCart }: StorefrontProps) {
                   <div className="w-8 h-8 rounded-full bg-warm-amber/60 border border-neutral-900" />
                 </div>
               </div>
-            </div>
+            </Link>
 
             {/* Content info */}
             <div className="p-6 text-left flex-1 flex flex-col justify-between space-y-4">
               <div>
-                <h4 className="font-serif font-bold text-vinyl-black text-xl leading-snug truncate">
-                  {vinyl.title}
+                <h4 className="font-serif font-bold text-vinyl-black text-xl leading-snug truncate hover:text-warm-amber transition">
+                  <Link to={`/item/${vinyl.id}`}>{vinyl.title}</Link>
                 </h4>
                 <p className="text-sm text-faded-olive font-bold mt-1">
                   {vinyl.artist}
@@ -135,13 +140,14 @@ export default function Storefront({ vinyls, onAddToCart }: StorefrontProps) {
                   R$ {vinyl.price.toFixed(2)}
                 </span>
                 
-                <button
+                <Button
                   onClick={() => onAddToCart(vinyl)}
                   disabled={vinyl.stock <= 0}
-                  className="px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-xl bg-warm-amber hover:bg-warm-amber/90 text-paper-white border-none shadow-[0_4px_12px_rgba(217,119,36,0.25)] transition hover:scale-105 active:scale-95 disabled:bg-neutral-300 disabled:text-neutral-500 disabled:scale-100 disabled:shadow-none cursor-pointer"
+                  variant="primary"
+                  size="sm"
                 >
                   {vinyl.stock > 0 ? 'Comprar' : 'Esgotado'}
-                </button>
+                </Button>
               </div>
             </div>
           </div>

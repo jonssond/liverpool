@@ -1,5 +1,8 @@
 import { useState } from 'react';
 import type { Order } from '../../mockData';
+import StatusBadge from '../../components/StatusBadge';
+import Button from '../../components/Button';
+import { Select } from '../../components/Input';
 
 interface DashboardProps {
   orders: Order[];
@@ -46,26 +49,7 @@ export default function Dashboard({ orders, onUpdateOrderStatus }: DashboardProp
     }
   };
 
-  const getStatusLabelColor = (status: Order['status']) => {
-    switch (status) {
-      case 'EM ABERTO': return 'bg-amber-100 text-amber-800 border-amber-300';
-      case 'EM PROCESSAMENTO': return 'bg-blue-100 text-blue-800 border-blue-300';
-      case 'PAGAMENTO REALIZADO': return 'bg-indigo-100 text-indigo-800 border-indigo-300';
-      case 'EM TRÂNSITO': return 'bg-teal-100 text-teal-800 border-teal-300';
-      case 'ENTREGUE': return 'bg-emerald-100 text-emerald-800 border-emerald-300';
-      case 'TROCA SOLICITADA': return 'bg-purple-100 text-purple-800 border-purple-300';
-      case 'TROCA ACEITA': return 'bg-cyan-100 text-cyan-800 border-cyan-300';
-      case 'TROCA NEGADA': return 'bg-rose-100 text-rose-800 border-rose-300';
-      case 'ITEM ENVIADO': return 'bg-yellow-100 text-yellow-800 border-yellow-300';
-      case 'ITEM RECEBIDO': return 'bg-orange-100 text-orange-800 border-orange-300';
-      case 'TROCA PROCESSADA': return 'bg-neutral-200 text-neutral-800 border-neutral-300';
-      case 'CANCELADO': return 'bg-red-100 text-red-800 border-red-300';
-      default: return 'bg-neutral-100 text-neutral-800 border-neutral-300';
-    }
-  };
-
   // MOCK GRAPH DATA (sales values grouped by months)
-  // Let's create an SVG line chart
   const months = ['Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto'];
   
   // Mock data for categories: Rock, Jazz, Pop, Electronic
@@ -93,8 +77,14 @@ export default function Dashboard({ orders, onUpdateOrderStatus }: DashboardProp
     return points.reduce((acc, p, i) => (i === 0 ? `M ${p.x} ${p.y}` : `${acc} L ${p.x} ${p.y}`), '');
   };
 
+  const chartMonthsOptions = [
+    { value: 3, label: 'Últimos 3 Meses' },
+    { value: 6, label: 'Últimos 6 Meses' },
+    { value: 12, label: 'Últimos 12 Meses' }
+  ];
+
   return (
-    <div className="space-y-8 text-left font-sans">
+    <div className="space-y-8 text-left font-sans animate-in fade-in duration-200">
       
       {/* SECTION 1: Sales Analysis Chart */}
       <div className="bg-white/80 border border-faded-olive/20 rounded-3xl p-6 md:p-8 shadow-sm">
@@ -104,17 +94,14 @@ export default function Dashboard({ orders, onUpdateOrderStatus }: DashboardProp
             <p className="text-xs text-faded-olive mt-1">Faturamento por categorias (Gêneros de Vinil)</p>
           </div>
           
-          <div className="flex gap-3">
-            {/* Months Filter */}
-            <select
+          <div>
+            <Select
+              label=""
               value={chartMonthsCount}
               onChange={e => setChartMonthsCount(Number(e.target.value))}
-              className="bg-paper-white border border-faded-olive/40 rounded-xl px-3 py-1.5 text-xs font-bold focus:outline-none text-vinyl-black"
-            >
-              <option value={3}>Últimos 3 Meses</option>
-              <option value={6}>Últimos 6 Meses</option>
-              <option value={12}>Últimos 12 Meses</option>
-            </select>
+              options={chartMonthsOptions}
+              className="font-bold py-1.5"
+            />
           </div>
         </div>
 
@@ -222,41 +209,40 @@ export default function Dashboard({ orders, onUpdateOrderStatus }: DashboardProp
 
         {/* Legend buttons */}
         <div className="flex gap-4 mt-4 justify-center">
-          <button 
+          <Button 
             onClick={() => setChartCategory('Todos')} 
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer border ${
-              chartCategory === 'Todos' ? 'bg-vinyl-black text-paper-white border-vinyl-black' : 'bg-transparent text-faded-olive border-neutral-300'
-            }`}
+            variant={chartCategory === 'Todos' ? 'secondary' : 'outline'}
+            size="sm"
           >
             Todos os Gêneros
-          </button>
-          <button 
+          </Button>
+          <Button 
             onClick={() => setChartCategory('Rock')} 
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer border flex items-center gap-2 ${
-              chartCategory === 'Rock' ? 'bg-soft-terracotta text-white border-soft-terracotta' : 'bg-transparent text-faded-olive border-neutral-300'
-            }`}
+            variant={chartCategory === 'Rock' ? 'primary' : 'outline'}
+            size="sm"
+            className="flex items-center gap-2"
           >
             <span className="w-2.5 h-2.5 rounded-full bg-soft-terracotta" />
             Rock / Classic
-          </button>
-          <button 
+          </Button>
+          <Button 
             onClick={() => setChartCategory('Jazz')} 
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer border flex items-center gap-2 ${
-              chartCategory === 'Jazz' ? 'bg-warm-amber text-white border-warm-amber' : 'bg-transparent text-faded-olive border-neutral-300'
-            }`}
+            variant={chartCategory === 'Jazz' ? 'primary' : 'outline'}
+            size="sm"
+            className="flex items-center gap-2"
           >
             <span className="w-2.5 h-2.5 rounded-full bg-warm-amber" />
             Jazz
-          </button>
-          <button 
+          </Button>
+          <Button 
             onClick={() => setChartCategory('Electronic')} 
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer border flex items-center gap-2 ${
-              chartCategory === 'Electronic' ? 'bg-faded-olive text-paper-white border-faded-olive' : 'bg-transparent text-faded-olive border-neutral-300'
-            }`}
+            variant={chartCategory === 'Electronic' ? 'secondary' : 'outline'}
+            size="sm"
+            className="flex items-center gap-2"
           >
             <span className="w-2.5 h-2.5 rounded-full bg-faded-olive" />
             Electronic
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -266,32 +252,33 @@ export default function Dashboard({ orders, onUpdateOrderStatus }: DashboardProp
         
         {/* Search and Filters */}
         <div className="flex flex-col md:flex-row gap-4 justify-between items-center mb-6">
-          <div className="relative w-full md:w-80">
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-              placeholder="Pesquisar por cliente ou Nº pedido..."
-              className="w-full pl-10 pr-4 py-2 text-xs text-vinyl-black bg-paper-white border border-faded-olive/40 rounded-xl focus:outline-none focus:border-warm-amber"
-            />
-            <svg className="absolute left-3 top-2.5 w-4 h-4 text-faded-olive/60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
+          <div className="relative w-full md:w-80 text-left">
+            <label className="text-xs font-bold text-faded-olive block mb-1">Pesquisar</label>
+            <div className="relative">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                placeholder="Pesquisar por cliente ou Nº pedido..."
+                className="w-full pl-10 pr-4 py-2 text-xs text-vinyl-black bg-paper-white border border-faded-olive/40 rounded-xl focus:outline-none focus:border-warm-amber"
+              />
+              <svg className="absolute left-3 top-2.5 w-4 h-4 text-faded-olive/60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </div>
           </div>
 
-          <div className="flex gap-2 flex-wrap">
+          <div className="flex gap-1.5 flex-wrap justify-end pt-5">
             {['Todos', 'EM ABERTO', 'EM PROCESSAMENTO', 'PAGAMENTO REALIZADO', 'EM TRÂNSITO', 'ENTREGUE', 'TROCA SOLICITADA', 'TROCA ACEITA', 'ITEM ENVIADO', 'ITEM RECEBIDO', 'TROCA PROCESSADA', 'CANCELADO'].map(st => (
-              <button
+              <Button
                 key={st}
                 onClick={() => setSelectedStatusFilter(st)}
-                className={`px-2 py-1 text-[10px] font-bold rounded-lg transition border cursor-pointer ${
-                  selectedStatusFilter === st
-                    ? 'bg-vinyl-black text-paper-white border-vinyl-black'
-                    : 'bg-transparent text-faded-olive border-faded-olive/30 hover:bg-faded-olive/5'
-                }`}
+                variant={selectedStatusFilter === st ? 'secondary' : 'outline'}
+                size="sm"
+                className="px-2 py-1 text-[10px]"
               >
                 {st}
-              </button>
+              </Button>
             ))}
           </div>
         </div>
@@ -321,21 +308,21 @@ export default function Dashboard({ orders, onUpdateOrderStatus }: DashboardProp
                     </td>
                     <td className="py-4 font-bold text-warm-amber">R$ {order.total.toFixed(2)}</td>
                     <td className="py-4">
-                      <span className={`inline-block px-2.5 py-0.5 text-[9px] font-bold rounded border uppercase ${getStatusLabelColor(order.status)}`}>
-                        {order.status}
-                      </span>
+                      <StatusBadge status={order.status} />
                     </td>
                     <td className="py-4 text-right">
                       {nextStates.length > 0 ? (
                         <div className="flex gap-1 justify-end">
                           {nextStates.map(nxt => (
-                            <button
+                            <Button
                               key={nxt}
                               onClick={() => onUpdateOrderStatus(order.id, nxt)}
-                              className="px-2 py-1 text-[10px] font-bold rounded-lg bg-warm-amber hover:bg-warm-amber/90 text-paper-white border-none transition cursor-pointer"
+                              variant="primary"
+                              size="sm"
+                              className="px-2 py-1 text-[10px]"
                             >
-                              Mudar para: {nxt}
-                            </button>
+                              {nxt}
+                            </Button>
                           ))}
                         </div>
                       ) : (

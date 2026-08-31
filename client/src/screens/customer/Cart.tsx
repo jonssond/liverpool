@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import type { Vinyl, Customer, Coupon, Address, CreditCard } from '../../mockData';
+import Button from '../../components/Button';
+import { Input, Select } from '../../components/Input';
 
 interface CartItem {
   vinyl: Vinyl;
@@ -94,7 +96,6 @@ export default function Cart({
   const handleCardToggle = (cardId: string) => {
     setSelectedCards(prev => {
       const updated = { ...prev, [cardId]: !prev[cardId] };
-      // initialize card amount with 0 if checked
       if (updated[cardId]) {
         setCardAmounts(prevAmt => ({ ...prevAmt, [cardId]: '' }));
       } else {
@@ -126,7 +127,6 @@ export default function Cart({
     };
     customer.cards.push(addedCard); // update local database directly
     setShowNewCardForm(false);
-    // automatically check the new card
     setSelectedCards(prev => ({ ...prev, [mockId]: true }));
     setCardAmounts(prev => ({ ...prev, [mockId]: '' }));
     setNewCard({ number: '', name: '', brand: 'Visa', cvv: '' });
@@ -152,13 +152,11 @@ export default function Cart({
       return;
     }
 
-    // Validation: check sum of split card payments matches total
     if (Math.abs(remainingToPay) > 0.05) {
       alert(`O valor total distribuído nos cartões (R$ ${totalPaidByCards.toFixed(2)}) não corresponde ao total do pedido (R$ ${total.toFixed(2)}). Falta pagar R$ ${remainingToPay.toFixed(2)}.`);
       return;
     }
 
-    // Build description of split payment
     let cardDescription = checkedCardList.map(([cardId]) => {
       const card = customer.cards.find(c => c.id === cardId);
       const val = parseFloat(cardAmounts[cardId]) || 0;
@@ -169,17 +167,27 @@ export default function Cart({
       ? `Cupom ${activeCoupon.code} (R$ ${activeCoupon.value.toFixed(2)}) + ${cardDescription}`
       : cardDescription;
 
-    // Trigger purchase success
     onCheckout(cartItems, total, paymentText);
     
-    // reset states
     setSelectedCards({});
     setCardAmounts({});
     setSelectedCouponCode('');
   };
 
+  const addressTypeOptions = [
+    { value: 'entrega', label: 'Entrega' },
+    { value: 'cobranca', label: 'Cobrança' }
+  ];
+
+  const brandOptions = [
+    { value: 'Visa', label: 'Visa' },
+    { value: 'Mastercard', label: 'Mastercard' },
+    { value: 'Elo', label: 'Elo' },
+    { value: 'Amex', label: 'Amex' }
+  ];
+
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 text-left font-sans">
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 text-left font-sans animate-in fade-in duration-200">
       
       {/* LEFT COLUMN: Shopping Cart List */}
       <div className="lg:col-span-2 space-y-6">
@@ -232,7 +240,7 @@ export default function Cart({
 
                     <button
                       onClick={() => onRemoveItem(item.vinyl.id)}
-                      className="text-neutral-400 hover:text-rose-600 transition cursor-pointer p-1.5"
+                      className="text-neutral-400 hover:text-rose-600 transition cursor-pointer p-1.5 border-none bg-transparent"
                     >
                       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -260,101 +268,74 @@ export default function Cart({
 
             {showNewAddressForm ? (
               <form onSubmit={handleAddNewAddress} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="flex flex-col space-y-1.5">
-                  <label className="text-xs font-bold text-faded-olive">Tipo de Endereço</label>
-                  <select
-                    value={newAddress.type}
-                    onChange={e => setNewAddress(prev => ({ ...prev, type: e.target.value as 'cobranca' | 'entrega' }))}
-                    className="bg-paper-white border border-faded-olive/40 rounded-xl px-3 py-2 text-sm focus:outline-none"
-                  >
-                    <option value="entrega">Entrega</option>
-                    <option value="cobranca">Cobrança</option>
-                  </select>
-                </div>
-                <div className="flex flex-col space-y-1.5">
-                  <label className="text-xs font-bold text-faded-olive">Tipo de Residência</label>
-                  <input
-                    type="text"
-                    required
-                    value={newAddress.tipoResidencia}
-                    onChange={e => setNewAddress(prev => ({ ...prev, tipoResidencia: e.target.value }))}
-                    placeholder="Casa, Apartamento, Comercial..."
-                    className="bg-paper-white border border-faded-olive/40 rounded-xl px-3 py-2 text-sm focus:outline-none"
-                  />
-                </div>
-                <div className="flex flex-col space-y-1.5">
-                  <label className="text-xs font-bold text-faded-olive">Rua / Logradouro</label>
-                  <input
-                    type="text"
-                    required
-                    value={newAddress.logradouro}
-                    onChange={e => setNewAddress(prev => ({ ...prev, logradouro: e.target.value }))}
-                    placeholder="Nome da rua/avenida"
-                    className="bg-paper-white border border-faded-olive/40 rounded-xl px-3 py-2 text-sm focus:outline-none"
-                  />
-                </div>
+                <Select
+                  label="Tipo de Endereço"
+                  value={newAddress.type}
+                  onChange={e => setNewAddress(prev => ({ ...prev, type: e.target.value as 'cobranca' | 'entrega' }))}
+                  options={addressTypeOptions}
+                />
+                <Input
+                  label="Tipo de Residência"
+                  type="text"
+                  required
+                  value={newAddress.tipoResidencia}
+                  onChange={e => setNewAddress(prev => ({ ...prev, tipoResidencia: e.target.value }))}
+                  placeholder="Casa, Apartamento, Comercial..."
+                />
+                <Input
+                  label="Rua / Logradouro"
+                  type="text"
+                  required
+                  value={newAddress.logradouro}
+                  onChange={e => setNewAddress(prev => ({ ...prev, logradouro: e.target.value }))}
+                  placeholder="Nome da rua/avenida"
+                />
                 <div className="grid grid-cols-3 gap-2">
-                  <div className="col-span-1 flex flex-col space-y-1.5">
-                    <label className="text-xs font-bold text-faded-olive">Número</label>
-                    <input
-                      type="text"
-                      required
-                      value={newAddress.numero}
-                      onChange={e => setNewAddress(prev => ({ ...prev, numero: e.target.value }))}
-                      className="bg-paper-white border border-faded-olive/40 rounded-xl px-3 py-2 text-sm focus:outline-none"
-                    />
-                  </div>
-                  <div className="col-span-2 flex flex-col space-y-1.5">
-                    <label className="text-xs font-bold text-faded-olive">CEP</label>
-                    <input
-                      type="text"
-                      required
-                      value={newAddress.cep}
-                      onChange={e => setNewAddress(prev => ({ ...prev, cep: e.target.value }))}
-                      placeholder="00000-000"
-                      className="bg-paper-white border border-faded-olive/40 rounded-xl px-3 py-2 text-sm focus:outline-none"
-                    />
-                  </div>
-                </div>
-                <div className="flex flex-col space-y-1.5">
-                  <label className="text-xs font-bold text-faded-olive">Bairro</label>
-                  <input
+                  <Input
+                    label="Número"
                     type="text"
                     required
-                    value={newAddress.bairro}
-                    onChange={e => setNewAddress(prev => ({ ...prev, bairro: e.target.value }))}
-                    className="bg-paper-white border border-faded-olive/40 rounded-xl px-3 py-2 text-sm focus:outline-none"
+                    value={newAddress.numero}
+                    onChange={e => setNewAddress(prev => ({ ...prev, numero: e.target.value }))}
+                    wrapperClassName="col-span-1"
+                  />
+                  <Input
+                    label="CEP"
+                    type="text"
+                    required
+                    value={newAddress.cep}
+                    onChange={e => setNewAddress(prev => ({ ...prev, cep: e.target.value }))}
+                    placeholder="00000-000"
+                    wrapperClassName="col-span-2"
                   />
                 </div>
+                <Input
+                  label="Bairro"
+                  type="text"
+                  required
+                  value={newAddress.bairro}
+                  onChange={e => setNewAddress(prev => ({ ...prev, bairro: e.target.value }))}
+                />
                 <div className="grid grid-cols-2 gap-2">
-                  <div className="flex flex-col space-y-1.5">
-                    <label className="text-xs font-bold text-faded-olive">Cidade</label>
-                    <input
-                      type="text"
-                      required
-                      value={newAddress.cidade}
-                      onChange={e => setNewAddress(prev => ({ ...prev, cidade: e.target.value }))}
-                      className="bg-paper-white border border-faded-olive/40 rounded-xl px-3 py-2 text-sm focus:outline-none"
-                    />
-                  </div>
-                  <div className="flex flex-col space-y-1.5">
-                    <label className="text-xs font-bold text-faded-olive">Estado</label>
-                    <input
-                      type="text"
-                      required
-                      value={newAddress.estado}
-                      onChange={e => setNewAddress(prev => ({ ...prev, estado: e.target.value }))}
-                      className="bg-paper-white border border-faded-olive/40 rounded-xl px-3 py-2 text-sm focus:outline-none"
-                    />
-                  </div>
+                  <Input
+                    label="Cidade"
+                    type="text"
+                    required
+                    value={newAddress.cidade}
+                    onChange={e => setNewAddress(prev => ({ ...prev, cidade: e.target.value }))}
+                  />
+                  <Input
+                    label="Estado"
+                    type="text"
+                    required
+                    value={newAddress.estado}
+                    onChange={e => setNewAddress(prev => ({ ...prev, estado: e.target.value }))}
+                  />
                 </div>
                 <div className="col-span-full pt-2">
-                  <button
-                    type="submit"
-                    className="w-full py-2 bg-faded-olive hover:bg-faded-olive/90 text-paper-white font-bold rounded-xl text-xs uppercase tracking-wider cursor-pointer border-none"
-                  >
+                  <Button type="submit" variant="secondary" className="w-full">
                     Salvar Endereço
-                  </button>
+                  </Button>
                 </div>
               </form>
             ) : (
@@ -414,19 +395,19 @@ export default function Cart({
               
               {/* Promo Coupon Selection */}
               <div className="flex flex-col gap-1.5 pt-2">
-                <label className="text-xs font-bold text-faded-olive">Cupom de Desconto / Troca</label>
-                <select
+                <Select
+                  label="Cupom de Desconto / Troca"
                   value={selectedCouponCode}
                   onChange={e => setSelectedCouponCode(e.target.value)}
-                  className="w-full bg-paper-white border border-faded-olive/40 rounded-xl px-3 py-2 text-xs focus:outline-none text-vinyl-black"
-                >
-                  <option value="">Nenhum cupom selecionado</option>
-                  {coupons.map(cp => (
-                    <option key={cp.id} value={cp.code} disabled={!cp.active}>
-                      {cp.code} - R$ {cp.value.toFixed(2)} ({cp.type === 'troca' ? 'Troca' : 'Promo'})
-                    </option>
-                  ))}
-                </select>
+                  options={[
+                    { value: '', label: 'Nenhum cupom selecionado' },
+                    ...coupons.map(cp => ({
+                      value: cp.code,
+                      label: `${cp.code} - R$ ${cp.value.toFixed(2)} (${cp.type === 'troca' ? 'Troca' : 'Promo'})`
+                    }))
+                  ]}
+                  className="text-xs py-2"
+                />
               </div>
 
               {discount > 0 && (
@@ -456,60 +437,50 @@ export default function Cart({
 
               {showNewCardForm ? (
                 <form onSubmit={handleAddNewCard} className="space-y-3 p-4 bg-faded-olive/5 border border-faded-olive/20 rounded-2xl">
-                  <div className="flex flex-col space-y-1">
-                    <label className="text-[10px] font-bold text-faded-olive">Número do Cartão</label>
-                    <input
-                      type="text"
-                      required
-                      value={newCard.number}
-                      onChange={e => setNewCard(prev => ({ ...prev, number: e.target.value }))}
-                      placeholder="16 dígitos"
-                      className="bg-paper-white border border-faded-olive/40 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none"
-                    />
-                  </div>
-                  <div className="flex flex-col space-y-1">
-                    <label className="text-[10px] font-bold text-faded-olive">Nome Impresso</label>
-                    <input
-                      type="text"
-                      required
-                      value={newCard.name}
-                      onChange={e => setNewCard(prev => ({ ...prev, name: e.target.value }))}
-                      placeholder="Nome no cartão"
-                      className="bg-paper-white border border-faded-olive/40 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none"
-                    />
-                  </div>
+                  <Input
+                    label="Número do Cartão"
+                    type="text"
+                    required
+                    value={newCard.number}
+                    onChange={e => setNewCard(prev => ({ ...prev, number: e.target.value }))}
+                    placeholder="16 dígitos"
+                    className="py-1.5 text-xs"
+                  />
+                  <Input
+                    label="Nome Impresso"
+                    type="text"
+                    required
+                    value={newCard.name}
+                    onChange={e => setNewCard(prev => ({ ...prev, name: e.target.value }))}
+                    placeholder="Nome no cartão"
+                    className="py-1.5 text-xs"
+                  />
                   <div className="grid grid-cols-2 gap-2">
-                    <div className="flex flex-col space-y-1">
-                      <label className="text-[10px] font-bold text-faded-olive">Bandeira</label>
-                      <select
-                        value={newCard.brand}
-                        onChange={e => setNewCard(prev => ({ ...prev, brand: e.target.value }))}
-                        className="bg-paper-white border border-faded-olive/40 rounded-lg px-2 py-1.5 text-xs focus:outline-none"
-                      >
-                        <option value="Visa">Visa</option>
-                        <option value="Mastercard">Mastercard</option>
-                        <option value="Elo">Elo</option>
-                        <option value="Amex">Amex</option>
-                      </select>
-                    </div>
-                    <div className="flex flex-col space-y-1">
-                      <label className="text-[10px] font-bold text-faded-olive">CVV</label>
-                      <input
-                        type="text"
-                        required
-                        maxLength={4}
-                        value={newCard.cvv}
-                        onChange={e => setNewCard(prev => ({ ...prev, cvv: e.target.value }))}
-                        className="bg-paper-white border border-faded-olive/40 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none"
-                      />
-                    </div>
+                    <Select
+                      label="Bandeira"
+                      value={newCard.brand}
+                      onChange={e => setNewCard(prev => ({ ...prev, brand: e.target.value }))}
+                      options={brandOptions}
+                      className="py-1.5 text-xs"
+                    />
+                    <Input
+                      label="CVV"
+                      type="text"
+                      required
+                      maxLength={4}
+                      value={newCard.cvv}
+                      onChange={e => setNewCard(prev => ({ ...prev, cvv: e.target.value }))}
+                      className="py-1.5 text-xs"
+                    />
                   </div>
-                  <button
+                  <Button
                     type="submit"
-                    className="w-full py-2 bg-warm-amber hover:bg-warm-amber/90 text-paper-white text-xs font-bold rounded-lg cursor-pointer border-none"
+                    variant="primary"
+                    size="sm"
+                    className="w-full mt-2"
                   >
                     Adicionar e Selecionar
-                  </button>
+                  </Button>
                 </form>
               ) : (
                 <div className="space-y-3">
@@ -542,9 +513,9 @@ export default function Cart({
                         {/* Amount input block for multi-card splitting */}
                         {isChecked && (
                           <div className="flex items-center gap-2 pl-6">
-                            <span className="text-[11px] text-faded-olive font-bold">Valor cobrado:</span>
+                            <span className="text-[11px] text-faded-olive font-bold">Valor:</span>
                             <div className="relative flex-1">
-                              <span className="absolute left-2.5 top-1.5 text-[11px] text-faded-olive">R$</span>
+                              <span className="absolute left-2.5 top-1 text-[11px] text-faded-olive">R$</span>
                               <input
                                 type="number"
                                 step="0.01"
@@ -590,13 +561,14 @@ export default function Cart({
             </div>
 
             {/* Checkout Button */}
-            <button
+            <Button
               onClick={handleFinishPurchase}
               disabled={cartItems.length === 0 || Math.abs(remainingToPay) > 0.05}
-              className="w-full mt-6 py-3 text-xs uppercase tracking-wider font-bold rounded-xl bg-warm-amber hover:bg-warm-amber/90 text-paper-white border-none shadow-md transition disabled:bg-neutral-300 disabled:text-neutral-500 disabled:shadow-none cursor-pointer active:scale-95"
+              variant="primary"
+              className="w-full mt-6"
             >
               Finalizar Compra
-            </button>
+            </Button>
           </div>
         </div>
       )}

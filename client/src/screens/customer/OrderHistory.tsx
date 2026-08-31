@@ -1,5 +1,9 @@
 import { useState } from 'react';
 import type { Order } from '../../mockData';
+import StatusBadge from '../../components/StatusBadge';
+import Modal from '../../components/Modal';
+import Button from '../../components/Button';
+import { Textarea } from '../../components/Input';
 
 interface OrderHistoryProps {
   orders: Order[];
@@ -37,39 +41,8 @@ export default function OrderHistory({ orders, onUpdateOrderStatus }: OrderHisto
     setShowExchangeModal(true);
   };
 
-  const getStatusBadgeClass = (status: Order['status']) => {
-    switch (status) {
-      case 'EM ABERTO':
-        return 'bg-amber-100 text-amber-800 border-amber-300';
-      case 'EM PROCESSAMENTO':
-        return 'bg-blue-100 text-blue-800 border-blue-300';
-      case 'PAGAMENTO REALIZADO':
-        return 'bg-indigo-100 text-indigo-800 border-indigo-300';
-      case 'EM TRÂNSITO':
-        return 'bg-teal-100 text-teal-800 border-teal-300';
-      case 'ENTREGUE':
-        return 'bg-emerald-100 text-emerald-800 border-emerald-300';
-      case 'TROCA SOLICITADA':
-        return 'bg-purple-100 text-purple-800 border-purple-300';
-      case 'TROCA ACEITA':
-        return 'bg-cyan-100 text-cyan-800 border-cyan-300';
-      case 'TROCA NEGADA':
-        return 'bg-rose-100 text-rose-800 border-rose-300';
-      case 'ITEM ENVIADO':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-300';
-      case 'ITEM RECEBIDO':
-        return 'bg-orange-100 text-orange-800 border-orange-300';
-      case 'TROCA PROCESSADA':
-        return 'bg-neutral-200 text-neutral-800 border-neutral-300';
-      case 'CANCELADO':
-        return 'bg-red-100 text-red-800 border-red-300';
-      default:
-        return 'bg-neutral-100 text-neutral-800 border-neutral-300';
-    }
-  };
-
   return (
-    <div className="space-y-6 text-left font-sans">
+    <div className="space-y-6 text-left font-sans animate-in fade-in duration-200">
       
       <div className="bg-white/80 border border-faded-olive/20 rounded-3xl p-6 md:p-8 shadow-sm">
         <h3 className="font-serif font-bold text-2xl text-vinyl-black mb-6">Seus Pedidos</h3>
@@ -101,60 +74,64 @@ export default function OrderHistory({ orders, onUpdateOrderStatus }: OrderHisto
                     <td className="py-4 text-xs text-faded-olive">{order.createdAt}</td>
                     <td className="py-4 font-bold text-warm-amber">R$ {order.total.toFixed(2)}</td>
                     <td className="py-4">
-                      <span className={`inline-block px-2.5 py-0.5 text-[10px] font-bold rounded-lg border uppercase ${getStatusBadgeClass(order.status)}`}>
-                        {order.status}
-                      </span>
+                      <StatusBadge status={order.status} />
                     </td>
                     <td className="py-4 text-right space-x-2">
-                      <button
+                      <Button
                         onClick={() => setSelectedOrder(order)}
-                        className="px-3 py-1.5 rounded-lg text-xs font-bold text-faded-olive border border-faded-olive/40 hover:bg-faded-olive/5 cursor-pointer"
+                        variant="outline"
+                        size="sm"
                       >
                         Detalhes
-                      </button>
+                      </Button>
 
                       {/* Cancel purchase when pending */}
                       {(order.status === 'EM ABERTO' || order.status === 'EM PROCESSAMENTO' || order.status === 'PAGAMENTO REALIZADO') && (
-                        <button
+                        <Button
                           onClick={() => {
                             if (confirm('Tem certeza de que deseja cancelar este pedido?')) {
                               onUpdateOrderStatus(order.id, 'CANCELADO');
                             }
                           }}
-                          className="px-3 py-1.5 rounded-lg text-xs font-bold bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 cursor-pointer"
+                          variant="danger"
+                          size="sm"
                         >
                           Cancelar
-                        </button>
+                        </Button>
                       )}
 
                       {/* Confirm order arrival */}
                       {order.status === 'EM TRÂNSITO' && (
-                        <button
+                        <Button
                           onClick={() => onUpdateOrderStatus(order.id, 'ENTREGUE')}
-                          className="px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 cursor-pointer"
+                          variant="success"
+                          size="sm"
                         >
                           Confirmar Recebimento
-                        </button>
+                        </Button>
                       )}
 
                       {/* Request exchange */}
                       {order.status === 'ENTREGUE' && (
-                        <button
+                        <Button
                           onClick={() => openExchangeModal(order.id)}
-                          className="px-3 py-1.5 rounded-lg text-xs font-bold bg-purple-50 text-purple-700 border border-purple-200 hover:bg-purple-100 cursor-pointer"
+                          variant="secondary"
+                          size="sm"
                         >
                           Solicitar Troca
-                        </button>
+                        </Button>
                       )}
 
                       {/* Despachar/Enviar o item de troca após aprovação */}
                       {order.status === 'TROCA ACEITA' && (
-                        <button
+                        <Button
                           onClick={() => onUpdateOrderStatus(order.id, 'ITEM ENVIADO')}
-                          className="px-3 py-1.5 rounded-lg text-xs font-bold bg-cyan-50 text-cyan-700 border border-cyan-200 hover:bg-cyan-100 cursor-pointer animate-pulse"
+                          variant="primary"
+                          size="sm"
+                          className="animate-pulse"
                         >
                           Despachar Devolução
-                        </button>
+                        </Button>
                       )}
                     </td>
                   </tr>
@@ -166,24 +143,18 @@ export default function OrderHistory({ orders, onUpdateOrderStatus }: OrderHisto
       </div>
 
       {/* Expanded Order Details Modal/Drawer */}
-      {selectedOrder && (
-        <div className="fixed inset-0 z-50 bg-vinyl-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="w-full max-w-2xl bg-paper-white border border-faded-olive/20 rounded-3xl p-6 md:p-8 shadow-2xl relative">
-            <button
-              onClick={() => setSelectedOrder(null)}
-              className="absolute top-4 right-4 text-faded-olive hover:text-vinyl-black transition cursor-pointer p-1"
-            >
-              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-
-            <h3 className="font-serif font-bold text-2xl text-vinyl-black mb-6 border-b border-faded-olive/10 pb-4 flex justify-between items-center pr-8">
-              <span>Pedido: {selectedOrder.id}</span>
-              <span className={`text-xs px-2.5 py-1 rounded-full uppercase border font-sans ${getStatusBadgeClass(selectedOrder.status)}`}>
-                {selectedOrder.status}
-              </span>
-            </h3>
+      <Modal
+        isOpen={selectedOrder !== null}
+        onClose={() => setSelectedOrder(null)}
+        title={`Pedido: ${selectedOrder?.id}`}
+        maxWidthClass="max-w-2xl"
+      >
+        {selectedOrder && (
+          <>
+            <div className="flex justify-between items-center mb-6">
+              <span className="text-xs font-bold text-faded-olive uppercase">Status do Pedido:</span>
+              <StatusBadge status={selectedOrder.status} />
+            </div>
 
             {/* Items details */}
             <div className="space-y-4 max-h-60 overflow-y-auto mb-6">
@@ -226,82 +197,69 @@ export default function OrderHistory({ orders, onUpdateOrderStatus }: OrderHisto
             </div>
 
             <div className="mt-8 flex justify-end">
-              <button
+              <Button
                 onClick={() => setSelectedOrder(null)}
-                className="px-6 py-2 rounded-xl bg-faded-olive text-paper-white font-bold text-xs uppercase tracking-wider cursor-pointer border-none"
+                variant="secondary"
               >
                 Fechar Detalhes
-              </button>
+              </Button>
             </div>
-
-          </div>
-        </div>
-      )}
+          </>
+        )}
+      </Modal>
 
       {/* Exchange/Refund Request Form Modal */}
-      {showExchangeModal && (
-        <div className="fixed inset-0 z-50 bg-vinyl-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="w-full max-w-md bg-paper-white border border-faded-olive/20 rounded-3xl p-6 md:p-8 shadow-2xl relative">
-            <button
-              onClick={() => setShowExchangeModal(false)}
-              className="absolute top-4 right-4 text-faded-olive hover:text-vinyl-black transition cursor-pointer p-1"
-            >
-              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-
-            <h3 className="font-serif font-bold text-xl text-vinyl-black mb-6">Solicitar Devolução / Troca</h3>
-
-            <form onSubmit={handleRequestExchangeSubmit} className="space-y-4">
-              <div className="flex flex-col space-y-1.5">
-                <label className="text-xs font-bold text-faded-olive">Tipo de Solicitação</label>
-                <div className="flex gap-4">
-                  <label className="flex items-center gap-2 text-xs font-bold text-vinyl-black cursor-pointer">
-                    <input
-                      type="radio"
-                      name="exchangeType"
-                      checked={exchangeType === 'troca'}
-                      onChange={() => setExchangeType('troca')}
-                      className="accent-warm-amber"
-                    />
-                    Troca (Gera cupom de troca)
-                  </label>
-                  <label className="flex items-center gap-2 text-xs font-bold text-vinyl-black cursor-pointer">
-                    <input
-                      type="radio"
-                      name="exchangeType"
-                      checked={exchangeType === 'devolucao'}
-                      onChange={() => setExchangeType('devolucao')}
-                      className="accent-warm-amber"
-                    />
-                    Devolução (Reembolso)
-                  </label>
-                </div>
-              </div>
-
-              <div className="flex flex-col space-y-1.5">
-                <label className="text-xs font-bold text-faded-olive">Motivo da Devolução</label>
-                <textarea
-                  rows={4}
-                  required
-                  value={exchangeReason}
-                  onChange={e => setExchangeReason(e.target.value)}
-                  placeholder="Por favor, explique o motivo (ex: disco riscado, encarte avariado, arrependimento de compra)..."
-                  className="bg-paper-white border border-faded-olive/40 rounded-xl px-3 py-2 text-xs focus:outline-none placeholder-faded-olive/50 text-vinyl-black"
+      <Modal
+        isOpen={showExchangeModal}
+        onClose={() => setShowExchangeModal(false)}
+        title="Solicitar Devolução / Troca"
+        maxWidthClass="max-w-md"
+      >
+        <form onSubmit={handleRequestExchangeSubmit} className="space-y-4">
+          <div className="flex flex-col space-y-1.5 text-left">
+            <label className="text-xs font-bold text-faded-olive">Tipo de Solicitação</label>
+            <div className="flex gap-4">
+              <label className="flex items-center gap-2 text-xs font-bold text-vinyl-black cursor-pointer">
+                <input
+                  type="radio"
+                  name="exchangeType"
+                  checked={exchangeType === 'troca'}
+                  onChange={() => setExchangeType('troca')}
+                  className="accent-warm-amber"
                 />
-              </div>
-
-              <button
-                type="submit"
-                className="w-full py-3 bg-warm-amber hover:bg-warm-amber/90 text-paper-white font-bold text-xs uppercase tracking-wider rounded-xl cursor-pointer shadow-md border-none"
-              >
-                Enviar Solicitação
-              </button>
-            </form>
+                Troca (Gera cupom de troca)
+              </label>
+              <label className="flex items-center gap-2 text-xs font-bold text-vinyl-black cursor-pointer">
+                <input
+                  type="radio"
+                  name="exchangeType"
+                  checked={exchangeType === 'devolucao'}
+                  onChange={() => setExchangeType('devolucao')}
+                  className="accent-warm-amber"
+                />
+                Devolução (Reembolso)
+              </label>
+            </div>
           </div>
-        </div>
-      )}
+
+          <Textarea
+            label="Motivo da Devolução"
+            required
+            rows={4}
+            value={exchangeReason}
+            onChange={e => setExchangeReason(e.target.value)}
+            placeholder="Por favor, explique o motivo (ex: disco riscado, encarte avariado, arrependimento de compra)..."
+          />
+
+          <Button
+            type="submit"
+            variant="primary"
+            className="w-full"
+          >
+            Enviar Solicitação
+          </Button>
+        </form>
+      </Modal>
 
     </div>
   );
