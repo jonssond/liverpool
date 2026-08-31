@@ -231,7 +231,7 @@ export default function CustomerCrud({ customers, onAddCustomer, onUpdateCustome
       {/* Customer List Header */}
       <div className="bg-white/80 border border-faded-olive/20 rounded-3xl p-6 md:p-8 shadow-sm">
         <div className="flex justify-between items-center mb-6">
-          <h3 className="font-serif font-bold text-2xl text-vinyl-black">Painel de Clientes (Admin Only)</h3>
+          <h3 className="font-serif font-bold text-2xl text-vinyl-black">Painel de Clientes</h3>
           <Button
             onClick={() => { resetForms(); setShowAddForm(true); }}
             variant="primary"

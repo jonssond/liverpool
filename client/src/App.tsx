@@ -313,7 +313,7 @@ function AppContent() {
       {/* FOOTER */}
       <footer className="border-t border-faded-olive/15 bg-white/40 py-8 text-center text-xs text-faded-olive">
         <div className="max-w-6xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4">
-          <p>Liverpool Discos &copy; 2026. Todos os direitos reservados. UI Português / Code English.</p>
+          <p>Liverpool Discos &copy; 2026. Todos os direitos reservados.</p>
           <div className="flex gap-4">
             <span className="hover:text-vinyl-black transition cursor-pointer">Termos de Uso</span>
             <span className="hover:text-vinyl-black transition cursor-pointer">Política de Privacidade</span>
