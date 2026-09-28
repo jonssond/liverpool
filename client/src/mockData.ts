@@ -155,7 +155,7 @@ export const INITIAL_CUSTOMERS: Customer[] = [
     id: "c1",
     name: "Diogo Jonsson",
     email: "diogo@discos.com",
-    cpf: "123.456.789-00",
+    cpf: "123.456.789-09",
     gender: "Masculino",
     birthdate: "1998-05-15",
     phone: "Celular (11) 98765-4321",
@@ -207,9 +207,9 @@ export const INITIAL_CUSTOMERS: Customer[] = [
   },
   {
     id: "c2",
-    name: "Clara Maria",
-    email: "clara@discos.com",
-    cpf: "987.654.321-11",
+    name: "John Doe",
+    email: "john.doe@discos.com",
+    cpf: "987.654.321-00",
     gender: "Feminino",
     birthdate: "1995-10-22",
     phone: "Celular (21) 99888-7766",
@@ -246,7 +246,7 @@ export const INITIAL_CUSTOMERS: Customer[] = [
       {
         id: "card3",
         number: "**** **** **** 9911",
-        name: "CLARA MARIA",
+        name: "JOHN DOE",
         brand: "Elo",
         cvv: "789"
       }
@@ -258,7 +258,7 @@ export const INITIAL_COUPONS: Coupon[] = [
   { id: "cp1", code: "LIVERPOOL10", value: 10, type: "promocional", active: true },
   { id: "cp2", code: "VINYL20", value: 20, type: "promocional", active: true },
   { id: "cp3", code: "TROCA_DIOGO_50", value: 50.00, type: "troca", active: true },
-  { id: "cp4", code: "TROCA_CLARA_30", value: 30.00, type: "troca", active: true }
+  { id: "cp4", code: "TROCA_JOHN_30", value: 30.00, type: "troca", active: true }
 ];
 
 export const INITIAL_ORDERS: Order[] = [

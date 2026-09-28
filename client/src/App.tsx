@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   BrowserRouter as Router, 
   Routes, 
@@ -30,24 +30,32 @@ import ItemDetails from './screens/customer/ItemDetails';
 import CustomerCrud from './screens/admin/CustomerCrud';
 import Dashboard from './screens/admin/Dashboard';
 import Chatbot from './components/Chatbot';
+import { apiGetCustomers } from './services/customerApi';
 
 function AppContent() {
   const location = useLocation();
   const navigate = useNavigate();
   const isAdmin = location.pathname.startsWith('/admin');
 
-  // Shared mock databases in state
   const [vinyls, setVinyls] = useState<Vinyl[]>(INITIAL_VINYLS);
-  const [customers, setCustomers] = useState<Customer[]>(INITIAL_CUSTOMERS);
+  const [customers, setCustomers] = useState<Customer[] | null>();
   const [coupons, setCoupons] = useState<Coupon[]>(INITIAL_COUPONS);
   const [orders, setOrders] = useState<Order[]>(INITIAL_ORDERS);
   
-  // Shopping Cart state
+  useEffect(() => {
+    apiGetCustomers()
+      .then(data => {
+        if (Array.isArray(data) && data.length > 0) {
+          setCustomers(data);
+        }
+      })
+      .catch(err => console.warn('Could not fetch customers from server:', err.message));
+  }, []);
+  
   const [cart, setCart] = useState<{ vinyl: Vinyl; quantity: number }[]>([]);
 
-  const diogoUser = customers[0] || INITIAL_CUSTOMERS[0]; // Logged in client simulation
+  const diogoUser = customers?.[0] || INITIAL_CUSTOMERS[0]; 
 
-  // 🛒 Cart Handlers
   const handleAddToCart = (product: Vinyl) => {
     setCart(prev => {
       const existing = prev.find(item => item.vinyl.id === product.id);
@@ -57,7 +65,6 @@ function AppContent() {
       }
       return [...prev, { vinyl: product, quantity: 1 }];
     });
-    // Redirect to checkout path
     navigate('/checkout');
   };
 
@@ -124,7 +131,6 @@ function AppContent() {
     alert('Compra efetuada! Pedido criado com sucesso com status EM ABERTO.');
   };
 
-  // 🚦 Order status changes
   const handleUpdateOrderStatus = (orderId: string, newStatus: Order['status']) => {
     setOrders(prevOrders => prevOrders.map(order => {
       if (order.id === orderId) {
@@ -146,14 +152,12 @@ function AppContent() {
     }));
   };
 
-  // 👥 Customer CRUD handlers
   const handleAddCustomer = (cust: Customer) => {
-    setCustomers(prev => [...prev, cust]);
-    alert(`Cliente ${cust.name} cadastrado com sucesso.`);
+    setCustomers(prev => [cust, ...(prev ?? [])]);
   };
 
   const handleUpdateCustomer = (cust: Customer) => {
-    setCustomers(prev => prev.map(c => c.id === cust.id ? cust : c));
+    setCustomers(prev => (prev ?? []).map(c => c.id === cust.id ? cust : c));
   };
 
   const totalCartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
@@ -192,7 +196,7 @@ function AppContent() {
                     `px-3 py-2 transition rounded-xl ${isActive ? 'text-warm-amber bg-white/5' : 'text-faded-olive hover:text-paper-white'}`
                   }
                 >
-                  Discos (Loja)
+                  Discos 
                 </NavLink>
                 <NavLink
                   to="/checkout"
@@ -239,7 +243,7 @@ function AppContent() {
                     `px-3 py-2 transition rounded-xl ${isActive ? 'text-warm-amber bg-white/5' : 'text-faded-olive hover:text-paper-white'}`
                   }
                 >
-                  Painel Geral (ADM)
+                  Painel Geral
                 </NavLink>
                 <NavLink
                   to="/admin/customers"
@@ -247,7 +251,7 @@ function AppContent() {
                     `px-3 py-2 transition rounded-xl ${isActive ? 'text-warm-amber bg-white/5' : 'text-faded-olive hover:text-paper-white'}`
                   }
                 >
-                  Clientes (CRUD)
+                  Clientes
                 </NavLink>
                 <Link
                   to="/"
