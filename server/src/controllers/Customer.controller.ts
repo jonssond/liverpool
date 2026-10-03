@@ -53,6 +53,26 @@ export class CustomerController {
     }
   }
 
+  async addAddress(req: Request, res: Response): Promise<void> {
+    try {
+      const { id } = req.params;
+      const customer = await this.customerService.addAddress(id as string, req.body);
+      res.status(200).json(customer);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message || "Erro ao adicionar endereço." });
+    }
+  }
+
+  async addCard(req: Request, res: Response): Promise<void> {
+    try {
+      const { id } = req.params;
+      const customer = await this.customerService.addCard(id as string, req.body);
+      res.status(200).json(customer);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message || "Erro ao adicionar cartão." });
+    }
+  }
+
   async delete(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;

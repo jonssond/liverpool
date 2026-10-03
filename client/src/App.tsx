@@ -18,8 +18,7 @@ import type {
   Vinyl, 
   Customer, 
   Coupon, 
-  Order,
-  OrderItem
+  Order
 } from './mockData';
 
 import Storefront from './screens/customer/Storefront';
@@ -31,6 +30,7 @@ import CustomerCrud from './screens/admin/CustomerCrud';
 import Dashboard from './screens/admin/Dashboard';
 import Chatbot from './components/Chatbot';
 import { apiGetCustomers } from './services/customerApi';
+import { apiGetOrders, apiGetCoupons, apiCreateOrder, apiUpdateOrderStatus } from './services/orderApi';
 
 function AppContent() {
   const location = useLocation();
@@ -50,20 +50,41 @@ function AppContent() {
         }
       })
       .catch(err => console.warn('Could not fetch customers from server:', err.message));
+
+    apiGetCoupons()
+      .then(data => {
+        if (Array.isArray(data) && data.length > 0) {
+          setCoupons(data);
+        }
+      })
+      .catch(err => console.warn('Could not fetch coupons from server:', err.message));
+
+    apiGetOrders()
+      .then(data => {
+        if (Array.isArray(data) && data.length > 0) {
+          setOrders(data);
+        }
+      })
+      .catch(err => console.warn('Could not fetch orders from server:', err.message));
   }, []);
   
   const [cart, setCart] = useState<{ vinyl: Vinyl; quantity: number }[]>([]);
 
   const diogoUser = customers?.[0] || INITIAL_CUSTOMERS[0]; 
 
-  const handleAddToCart = (product: Vinyl) => {
+  const handleAddToCart = (product: Vinyl, qtyToAdd = 1) => {
+    if (product.stock <= 0) {
+      alert("RN0031: Produto indisponível em estoque.");
+      return;
+    }
     setCart(prev => {
       const existing = prev.find(item => item.vinyl.id === product.id);
       if (existing) {
-        const newQty = Math.min(product.stock, existing.quantity + 1);
+        const newQty = Math.min(product.stock, existing.quantity + qtyToAdd);
         return prev.map(item => item.vinyl.id === product.id ? { ...item, quantity: newQty } : item);
       }
-      return [...prev, { vinyl: product, quantity: 1 }];
+      const initialQty = Math.min(product.stock, Math.max(1, qtyToAdd));
+      return [...prev, { vinyl: product, quantity: initialQty }];
     });
     navigate('/checkout');
   };
@@ -87,51 +108,97 @@ function AppContent() {
     setCart(prev => prev.filter(item => item.vinyl.id !== vinylId));
   };
 
-  const handleCheckout = (
-    items: { vinyl: Vinyl; quantity: number }[],
-    total: number,
-    paymentDetails: string
-  ) => {
-    setVinyls(prevVinyls => prevVinyls.map(v => {
-      const cartItem = items.find(item => item.vinyl.id === v.id);
-      if (cartItem) {
-        return { ...v, stock: Math.max(0, v.stock - cartItem.quantity) };
+  const handleCheckout = async (orderPayload: {
+    items: { vinyl: Vinyl; quantity: number }[];
+    deliveryAddress: any;
+    saveAddressToProfile: boolean;
+    cards: Array<{
+      id?: string;
+      number: string;
+      name: string;
+      brand: string;
+      cvv?: string;
+      amount: number;
+    }>;
+    saveCardToProfile: boolean;
+    selectedCoupons: Coupon[];
+    subtotal: number;
+    freight: number;
+    discount: number;
+    total: number;
+    surplusExchangeCouponValue: number;
+  }) => {
+    try {
+      const apiPayload = {
+        customerId: diogoUser.id,
+        items: orderPayload.items.map(it => ({
+          vinylId: it.vinyl.id,
+          title: it.vinyl.title,
+          artist: it.vinyl.artist,
+          coverUrl: it.vinyl.coverUrl,
+          price: it.vinyl.price,
+          quantity: it.quantity,
+        })),
+        deliveryAddress: orderPayload.deliveryAddress,
+        saveAddressToProfile: orderPayload.saveAddressToProfile,
+        cards: orderPayload.cards,
+        saveCardToProfile: orderPayload.saveCardToProfile,
+        couponCodes: orderPayload.selectedCoupons.map(c => c.code),
+      };
+
+      const result = await apiCreateOrder(apiPayload);
+      const newOrder = result.order;
+
+      // Update local stock
+      setVinyls(prevVinyls => prevVinyls.map(v => {
+        const cartItem = orderPayload.items.find(item => item.vinyl.id === v.id);
+        if (cartItem) {
+          return { ...v, stock: Math.max(0, v.stock - cartItem.quantity) };
+        }
+        return v;
+      }));
+
+      // Inactivate used coupons and add generated surplus exchange coupon
+      setCoupons(prevCoupons => {
+        let updated = prevCoupons.map(c => {
+          if (orderPayload.selectedCoupons.some(sc => sc.code === c.code)) {
+            return { ...c, active: false };
+          }
+          return c;
+        });
+        if (result.generatedExchangeCoupon) {
+          updated = [result.generatedExchangeCoupon, ...updated];
+        }
+        return updated;
+      });
+
+      // Update customer profile addresses & cards if requested
+      if (orderPayload.saveAddressToProfile) {
+        apiGetCustomers().then(data => {
+          if (Array.isArray(data)) setCustomers(data);
+        });
       }
-      return v;
-    }));
 
-    const orderItems: OrderItem[] = items.map(item => ({
-      vinylId: item.vinyl.id,
-      title: item.vinyl.title,
-      artist: item.vinyl.artist,
-      coverUrl: item.vinyl.coverUrl,
-      price: item.vinyl.price,
-      quantity: item.quantity
-    }));
+      setOrders(prev => [newOrder, ...prev]);
+      setCart([]);
+      navigate('/my-orders');
 
-    const subtotal = items.reduce((sum, item) => sum + item.vinyl.price * item.quantity, 0);
-
-    const newOrder: Order = {
-      id: `PED-00${orders.length + 1}`,
-      customerId: diogoUser.id,
-      customerName: diogoUser.name,
-      items: orderItems,
-      subtotal,
-      freight: 15.00,
-      discount: subtotal + 15.00 - total,
-      total,
-      status: 'EM ABERTO',
-      paymentDetails,
-      createdAt: new Date().toISOString().replace('T', ' ').substring(0, 16)
-    };
-
-    setOrders(prev => [newOrder, ...prev]);
-    setCart([]);
-    navigate('/my-orders');
-    alert('Compra efetuada! Pedido criado com sucesso com status EM ABERTO.');
+      if (result.generatedExchangeCoupon) {
+        alert(
+          `Compra finalizada com status EM PROCESSAMENTO!\nCupom de troca gerado para a sobra: ${result.generatedExchangeCoupon.code} no valor de R$ ${result.generatedExchangeCoupon.value.toFixed(2)}.`
+        );
+      } else {
+        alert('Compra efetuada! Pedido criado com status EM PROCESSAMENTO.');
+      }
+    } catch (err: any) {
+      alert(`Erro ao finalizar pedido: ${err.message}`);
+    }
   };
 
   const handleUpdateOrderStatus = (orderId: string, newStatus: Order['status']) => {
+    apiUpdateOrderStatus(orderId, newStatus).catch(err => {
+      console.warn('Erro ao atualizar status no servidor:', err.message);
+    });
     setOrders(prevOrders => prevOrders.map(order => {
       if (order.id === orderId) {
         if (newStatus === 'TROCA ACEITA') {

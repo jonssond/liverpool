@@ -67,13 +67,13 @@ export default function OrderHistory({ orders, onUpdateOrderStatus }: OrderHisto
                   <th className="pb-3 text-right">Ações</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-faded-olive/10">
+              <tbody className="divide-y divide-faded-olive/10" data-cy="orders-tbody">
                 {orders.map(order => (
-                  <tr key={order.id} className="hover:bg-faded-olive/5 transition">
-                    <td className="py-4 font-bold text-vinyl-black">{order.id}</td>
+                  <tr key={order.id} className="hover:bg-faded-olive/5 transition" data-cy={`order-row-${order.id}`}>
+                    <td className="py-4 font-bold text-vinyl-black" data-cy="order-id">{order.id}</td>
                     <td className="py-4 text-xs text-faded-olive">{order.createdAt}</td>
-                    <td className="py-4 font-bold text-warm-amber">R$ {order.total.toFixed(2)}</td>
-                    <td className="py-4">
+                    <td className="py-4 font-bold text-warm-amber" data-cy="order-total">R$ {order.total.toFixed(2)}</td>
+                    <td className="py-4" data-cy="order-status">
                       <StatusBadge status={order.status} />
                     </td>
                     <td className="py-4 text-right space-x-2">
@@ -81,6 +81,7 @@ export default function OrderHistory({ orders, onUpdateOrderStatus }: OrderHisto
                         onClick={() => setSelectedOrder(order)}
                         variant="outline"
                         size="sm"
+                        data-cy={`btn-details-${order.id}`}
                       >
                         Detalhes
                       </Button>

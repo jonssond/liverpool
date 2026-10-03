@@ -45,6 +45,12 @@ customerRouter.put("/:id", isAdmin, (req, res) =>
 customerRouter.patch("/:id/status", isAdmin, (req, res) =>
   getCustomerController().updateStatus(req, res)
 );
+customerRouter.post("/:id/addresses", (req, res) =>
+  getCustomerController().addAddress(req, res)
+);
+customerRouter.post("/:id/cards", (req, res) =>
+  getCustomerController().addCard(req, res)
+);
 customerRouter.delete("/:id", isAdmin, (req, res) =>
   getCustomerController().delete(req, res)
 );

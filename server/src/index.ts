@@ -3,6 +3,7 @@ import express from "express";
 import cors from "cors";
 import { initializeDatabase } from "./database/data-source.js";
 import { customerRouter } from "./routes/customer.routes.js";
+import { orderRouter } from "./routes/order.routes.js";
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -15,6 +16,7 @@ app.get("/api/health", (req, res) => {
 });
 
 app.use("/api/customers", customerRouter);
+app.use("/api/orders", orderRouter);
 
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
   console.error("Unhandled error:", err);

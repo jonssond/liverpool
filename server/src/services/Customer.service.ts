@@ -10,6 +10,7 @@ import {
   validatePhone,
   validateStrongPassword,
 } from "../utils/validators.js";
+import { logTransaction } from "../utils/auditLogger.js";
 
 export interface CreateCustomerDTO {
   name: string;
@@ -192,7 +193,14 @@ export class CustomerService {
       customer.cards = [];
     }
 
-    return this.customerRepo.create(customer);
+    const saved = await this.customerRepo.create(customer);
+    await logTransaction({
+      operation: "INSERT",
+      entityName: "Customer",
+      entityId: saved.id,
+      newData: { id: saved.id, name: saved.name, email: saved.email, cpf: saved.cpf },
+    });
+    return saved;
   }
 
   async update(id: string, dto: UpdateCustomerDTO): Promise<Customer> {
@@ -269,7 +277,77 @@ export class CustomerService {
       });
     }
 
-    return this.customerRepo.save(customer);
+    const previousData = { name: customer.name, email: customer.email, cpf: customer.cpf };
+    const saved = await this.customerRepo.save(customer);
+    await logTransaction({
+      operation: "UPDATE",
+      entityName: "Customer",
+      entityId: saved.id,
+      previousData,
+      newData: { id: saved.id, name: saved.name, email: saved.email, cpf: saved.cpf },
+    });
+    return saved;
+  }
+
+  async addAddress(customerId: string, addressData: any): Promise<Customer> {
+    const customer = await this.customerRepo.findById(customerId);
+    if (!customer) throw new Error("Cliente não encontrado.");
+
+    if (!addressData.logradouro?.trim() || !addressData.numero?.trim() || !addressData.cep?.trim() || !addressData.cidade?.trim()) {
+      throw new Error("Composição de endereço inválida (RN0023). Preencha Logradouro, Número, Bairro, CEP e Cidade.");
+    }
+
+    const addr = new Address();
+    addr.id = crypto.randomUUID();
+    addr.type = addressData.type || "entrega";
+    addr.tipoResidencia = addressData.tipoResidencia || "Apartamento";
+    addr.tipoLogradouro = addressData.tipoLogradouro || "Rua";
+    addr.logradouro = addressData.logradouro.trim();
+    addr.numero = addressData.numero.trim();
+    addr.bairro = addressData.bairro?.trim() || "Centro";
+    addr.cep = addressData.cep.trim();
+    addr.cidade = addressData.cidade.trim();
+    addr.estado = addressData.estado?.trim() || "SP";
+    addr.pais = addressData.pais?.trim() || "Brasil";
+
+    customer.addresses = [...(customer.addresses || []), addr];
+    const saved = await this.customerRepo.save(customer);
+    await logTransaction({
+      operation: "INSERT",
+      entityName: "Address",
+      entityId: addr.id,
+      responsibleUser: customer.email,
+      newData: { customerId: customer.id, ...addr },
+    });
+    return saved;
+  }
+
+  async addCard(customerId: string, cardData: any): Promise<Customer> {
+    const customer = await this.customerRepo.findById(customerId);
+    if (!customer) throw new Error("Cliente não encontrado.");
+
+    if (!cardData.number || !cardData.name) {
+      throw new Error("Dados de cartão incompletos (RN0024).");
+    }
+
+    const card = new CreditCard();
+    card.id = crypto.randomUUID();
+    const clean = cardData.number.replace(/\D/g, "");
+    card.number = `**** **** **** ${clean.slice(-4)}`;
+    card.name = cardData.name.trim().toUpperCase();
+    card.brand = cardData.brand || "Visa";
+    card.cvv = cardData.cvv?.trim() || "999";
+
+    customer.cards = [...(customer.cards || []), card];
+    const saved = await this.customerRepo.save(customer);
+    await logTransaction({
+      operation: "INSERT",
+      entityName: "CreditCard",
+      entityId: card.id,
+      responsibleUser: customer.email,
+      newData: { customerId: customer.id, id: card.id, brand: card.brand, number: card.number },
+    });
+    return saved;
   }
 
   async updateStatus(id: string, active: boolean, reason?: string): Promise<Customer> {
@@ -282,6 +360,7 @@ export class CustomerService {
       throw new Error("É obrigatório informar o motivo para a inativação do cliente.");
     }
 
+    const prevStatus = customer.active;
     customer.active = active;
     if (!active) {
       customer.deactivateReason = reason?.trim() || null;
@@ -289,7 +368,15 @@ export class CustomerService {
       customer.deactivateReason = null;
     }
 
-    return this.customerRepo.save(customer);
+    const saved = await this.customerRepo.save(customer);
+    await logTransaction({
+      operation: "UPDATE",
+      entityName: "CustomerStatus",
+      entityId: saved.id,
+      previousData: { active: prevStatus },
+      newData: { active: saved.active, deactivateReason: saved.deactivateReason },
+    });
+    return saved;
   }
 
   async delete(id: string): Promise<void> {
@@ -298,5 +385,11 @@ export class CustomerService {
       throw new Error("Cliente não encontrado.");
     }
     await this.customerRepo.delete(id);
+    await logTransaction({
+      operation: "DELETE",
+      entityName: "Customer",
+      entityId: id,
+      previousData: { id: customer.id, name: customer.name, email: customer.email },
+    });
   }
 }

@@ -5,7 +5,7 @@ import Button from '../../components/Button';
 
 interface StorefrontProps {
   vinyls: Vinyl[];
-  onAddToCart: (product: Vinyl) => void;
+  onAddToCart: (product: Vinyl, quantity?: number) => void;
 }
 
 export default function Storefront({ vinyls, onAddToCart }: StorefrontProps) {
@@ -136,7 +136,7 @@ export default function Storefront({ vinyls, onAddToCart }: StorefrontProps) {
               </div>
 
               <div className="flex items-center justify-between pt-4 border-t border-faded-olive/10">
-                <span className="text-2xl font-bold text-warm-amber font-sans">
+                <span className="text-2xl font-bold text-warm-amber font-sans" data-cy={`vinyl-price-${vinyl.id}`}>
                   R$ {vinyl.price.toFixed(2)}
                 </span>
                 
@@ -145,6 +145,7 @@ export default function Storefront({ vinyls, onAddToCart }: StorefrontProps) {
                   disabled={vinyl.stock <= 0}
                   variant="primary"
                   size="sm"
+                  data-cy={`btn-buy-${vinyl.id}`}
                 >
                   {vinyl.stock > 0 ? 'Comprar' : 'Esgotado'}
                 </Button>

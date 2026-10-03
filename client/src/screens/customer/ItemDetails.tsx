@@ -1,12 +1,14 @@
+import { useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import type { Vinyl } from '../../mockData';
 
 interface ItemDetailsProps {
   vinyls: Vinyl[];
-  onAddToCart: (product: Vinyl) => void;
+  onAddToCart: (product: Vinyl, quantity?: number) => void;
 }
 
 export default function ItemDetails({ vinyls, onAddToCart }: ItemDetailsProps) {
+  const [quantity, setQuantity] = useState<number>(1);
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
@@ -145,7 +147,7 @@ export default function ItemDetails({ vinyls, onAddToCart }: ItemDetailsProps) {
             </div>
           </div>
 
-          <div className="flex items-center justify-between gap-6 pt-2">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pt-2">
             <div>
               <span className="text-xs text-faded-olive/60 block">Preço Unitário</span>
               <span className="text-3xl font-bold text-warm-amber">
@@ -153,13 +155,39 @@ export default function ItemDetails({ vinyls, onAddToCart }: ItemDetailsProps) {
               </span>
             </div>
 
-            <button
-              onClick={() => onAddToCart(vinyl)}
-              disabled={vinyl.stock <= 0}
-              className="flex-1 max-w-xs py-3.5 px-6 font-bold uppercase tracking-wider text-sm rounded-xl bg-warm-amber hover:bg-warm-amber/90 text-paper-white border-none shadow-[0_4px_16px_rgba(217,119,36,0.3)] transition hover:scale-105 active:scale-95 disabled:bg-neutral-300 disabled:text-neutral-500 disabled:scale-100 disabled:shadow-none cursor-pointer text-center"
-            >
-              Adicionar ao Carrinho
-            </button>
+            <div className="flex items-center gap-3 w-full sm:w-auto">
+              <div className="flex items-center border border-faded-olive/30 rounded-xl overflow-hidden bg-paper-white" data-cy="quantity-selector-details">
+                <button
+                  type="button"
+                  onClick={() => setQuantity(q => Math.max(1, q - 1))}
+                  className="px-3 py-2 text-xs text-faded-olive hover:bg-faded-olive/10 border-none cursor-pointer"
+                  data-cy="btn-decrease-qty"
+                >
+                  -
+                </button>
+                <span className="px-3 text-sm font-bold text-vinyl-black select-none" data-cy="input-qty-value">
+                  {quantity}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setQuantity(q => Math.min(vinyl.stock, q + 1))}
+                  disabled={quantity >= vinyl.stock}
+                  className="px-3 py-2 text-xs text-faded-olive hover:bg-faded-olive/10 border-none disabled:opacity-40 cursor-pointer"
+                  data-cy="btn-increase-qty"
+                >
+                  +
+                </button>
+              </div>
+
+              <button
+                onClick={() => onAddToCart(vinyl, quantity)}
+                disabled={vinyl.stock <= 0}
+                className="flex-1 sm:flex-initial py-3 px-6 font-bold uppercase tracking-wider text-xs rounded-xl bg-warm-amber hover:bg-warm-amber/90 text-paper-white border-none shadow-[0_4px_16px_rgba(217,119,36,0.3)] transition hover:scale-105 active:scale-95 disabled:bg-neutral-300 disabled:text-neutral-500 disabled:scale-100 disabled:shadow-none cursor-pointer text-center"
+                data-cy="btn-add-to-cart"
+              >
+                {vinyl.stock > 0 ? 'Adicionar ao Carrinho' : 'Esgotado'}
+              </button>
+            </div>
           </div>
         </div>
 

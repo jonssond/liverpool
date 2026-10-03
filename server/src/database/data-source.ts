@@ -3,6 +3,9 @@ import { DataSource } from "typeorm";
 import { Customer } from "../entities/Customer.entity.js";
 import { Address } from "../entities/Address.entity.js";
 import { CreditCard } from "../entities/CreditCard.entity.js";
+import { Order } from "../entities/Order.entity.js";
+import { Coupon } from "../entities/Coupon.entity.js";
+import { AuditLog } from "../entities/AuditLog.entity.js";
 
 export const AppDataSource = new DataSource({
   type: "postgres",
@@ -13,7 +16,7 @@ export const AppDataSource = new DataSource({
   database: process.env.DB_NAME || "liverpool",
   synchronize: true,
   logging: false,
-  entities: [Customer, Address, CreditCard],
+  entities: [Customer, Address, CreditCard, Order, Coupon, AuditLog],
   migrations: [],
   subscribers: [],
 });
@@ -137,4 +140,69 @@ async function seedInitialData() {
     await customerRepo.save([customer1, customer2]);
     console.log("Initial customers seeded successfully.");
   }
+
+  const couponRepo = AppDataSource.getRepository(Coupon);
+  const couponCount = await couponRepo.count();
+  if (couponCount === 0) {
+    console.log("Seeding initial coupons...");
+    const coupons = [
+      couponRepo.create({
+        id: "cp1",
+        code: "LIVERPOOL10",
+        value: 10.0,
+        type: "promocional",
+        active: true,
+      }),
+      couponRepo.create({
+        id: "cp2",
+        code: "VINYL20",
+        value: 20.0,
+        type: "promocional",
+        active: true,
+      }),
+      couponRepo.create({
+        id: "cp3",
+        code: "TROCA_DIOGO_50",
+        value: 50.0,
+        type: "troca",
+        active: true,
+        customerId: "c1",
+      }),
+      couponRepo.create({
+        id: "cp4",
+        code: "TROCA_DIOGO_40",
+        value: 40.0,
+        type: "troca",
+        active: true,
+        customerId: "c1",
+      }),
+      couponRepo.create({
+        id: "cp5",
+        code: "TROCA_DIOGO_20",
+        value: 20.0,
+        type: "troca",
+        active: true,
+        customerId: "c1",
+      }),
+      couponRepo.create({
+        id: "cp6",
+        code: "TROCA_DIOGO_35",
+        value: 35.0,
+        type: "troca",
+        active: true,
+        customerId: "c1",
+      }),
+      couponRepo.create({
+        id: "cp7",
+        code: "TROCA_DIOGO_300",
+        value: 300.0,
+        type: "troca",
+        active: true,
+        customerId: "c1",
+      }),
+    ];
+    await couponRepo.save(coupons);
+    console.log("Initial coupons seeded successfully.");
+  }
 }
+
