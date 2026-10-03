@@ -210,7 +210,7 @@ describe('E-Commerce Flow & Checkout (RF0031-RF0038, RN0023-RN0036)', () => {
     cy.visit('/admin');
     cy.get('h3').should('contain.text', 'Painel de Gerenciamento de Pedidos');
     cy.get('tbody tr').first().within(() => {
-      cy.get('td').contains('EM PROCESSAMENTO').should('be.visible');
+      cy.get('[data-cy="dashboard-order-status"]').should('contain.text', 'Em Processamento');
     });
   });
 });

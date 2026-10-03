@@ -307,7 +307,7 @@ export default function Dashboard({ orders, onUpdateOrderStatus }: DashboardProp
                       {order.items.map(it => `${it.quantity}x ${it.title}`).join(', ')}
                     </td>
                     <td className="py-4 font-bold text-warm-amber">R$ {order.total.toFixed(2)}</td>
-                    <td className="py-4">
+                    <td className="py-4" data-cy="dashboard-order-status">
                       <StatusBadge status={order.status} />
                     </td>
                     <td className="py-4 text-right">

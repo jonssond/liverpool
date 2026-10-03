@@ -131,7 +131,7 @@ export default function Cart({
         unnecessaryMessage = `RN0036: O cupom ${c.code} é desnecessário pois os cupons anteriores já cobrem a totalidade da compra (R$ ${orderGrossTotal.toFixed(2)}).`;
         break;
       }
-      sum += c.value;
+      sum += Number(c.value) || 0;
       validCoupons.push(c);
     }
 
@@ -652,7 +652,7 @@ export default function Cart({
                             </span>
                           </div>
                         </div>
-                        <span className="font-bold text-warm-amber">R$ {cp.value.toFixed(2)}</span>
+                        <span className="font-bold text-warm-amber">R$ {Number(cp.value).toFixed(2)}</span>
                       </label>
                     );
                   })}
