@@ -183,13 +183,16 @@ function AppContent() {
       setCart([]);
       navigate('/my-orders');
 
-      if (result.generatedExchangeCoupon) {
-        alert(
-          `Compra finalizada com status EM PROCESSAMENTO!\nCupom de troca gerado para a sobra: ${result.generatedExchangeCoupon.code} no valor de R$ ${result.generatedExchangeCoupon.value.toFixed(2)}.`
-        );
-      } else {
-        alert('Compra efetuada! Pedido criado com status EM PROCESSAMENTO.');
-      }
+      // Delay alert to allow navigation to complete first
+      setTimeout(() => {
+        if (result.generatedExchangeCoupon) {
+          alert(
+            `Compra finalizada com status EM PROCESSAMENTO!\nCupom de troca gerado para a sobra: ${result.generatedExchangeCoupon.code} no valor de R$ ${result.generatedExchangeCoupon.value.toFixed(2)}.`
+          );
+        } else {
+          alert('Compra efetuada! Pedido criado com status EM PROCESSAMENTO.');
+        }
+      }, 100);
     } catch (err: any) {
       alert(`Erro ao finalizar pedido: ${err.message}`);
     }

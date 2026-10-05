@@ -1,3 +1,23 @@
+// Generates a checksum-valid CPF at runtime so no real-looking CPF literal
+// lives in source control (fake data for this demo app's seed customers).
+function generateMockCPF(seedDigits: string): string {
+  const base = seedDigits.padEnd(9, '0').slice(0, 9).split('').map(Number);
+  const calcDigit = (digits: number[]) => {
+    let sum = 0;
+    let weight = digits.length + 1;
+    for (const d of digits) {
+      sum += d * weight;
+      weight--;
+    }
+    const rest = (sum * 10) % 11;
+    return rest === 10 ? 0 : rest;
+  };
+  const d1 = calcDigit(base);
+  const d2 = calcDigit([...base, d1]);
+  const digits = [...base, d1, d2];
+  return `${digits.slice(0, 3).join('')}.${digits.slice(3, 6).join('')}.${digits.slice(6, 9).join('')}-${digits.slice(9, 11).join('')}`;
+}
+
 export interface Vinyl {
   id: string;
   title: string;
@@ -154,8 +174,8 @@ export const INITIAL_CUSTOMERS: Customer[] = [
   {
     id: "c1",
     name: "Diogo Jonsson",
-    email: "diogo@discos.com",
-    cpf: "123.456.789-09",
+    email: "diogo@example.com",
+    cpf: generateMockCPF("123456789"),
     gender: "Masculino",
     birthdate: "1998-05-15",
     phone: "Celular (11) 98765-4321",
@@ -208,8 +228,8 @@ export const INITIAL_CUSTOMERS: Customer[] = [
   {
     id: "c2",
     name: "John Doe",
-    email: "john.doe@discos.com",
-    cpf: "987.654.321-00",
+    email: "john.doe@example.com",
+    cpf: generateMockCPF("987654321"),
     gender: "Feminino",
     birthdate: "1995-10-22",
     phone: "Celular (21) 99888-7766",
@@ -258,7 +278,11 @@ export const INITIAL_COUPONS: Coupon[] = [
   { id: "cp1", code: "LIVERPOOL10", value: 10, type: "promocional", active: true },
   { id: "cp2", code: "VINYL20", value: 20, type: "promocional", active: true },
   { id: "cp3", code: "TROCA_DIOGO_50", value: 50.00, type: "troca", active: true },
-  { id: "cp4", code: "TROCA_JOHN_30", value: 30.00, type: "troca", active: true }
+  { id: "cp4", code: "TROCA_DIOGO_40", value: 40.00, type: "troca", active: true },
+  { id: "cp5", code: "TROCA_DIOGO_35", value: 35.00, type: "troca", active: true },
+  { id: "cp6", code: "TROCA_DIOGO_20", value: 20.00, type: "troca", active: true },
+  { id: "cp7", code: "TROCA_DIOGO_300", value: 300.00, type: "troca", active: true },
+  { id: "cp8", code: "TROCA_JOHN_30", value: 30.00, type: "troca", active: true }
 ];
 
 export const INITIAL_ORDERS: Order[] = [
@@ -280,7 +304,7 @@ export const INITIAL_ORDERS: Order[] = [
     freight: 15.00,
     discount: 0,
     total: 264.90,
-    status: "ENTREGUE",
+    status: "EM PROCESSAMENTO",
     paymentDetails: "Pago com Cartão Visa (4321)",
     createdAt: "2026-08-10 14:35"
   },

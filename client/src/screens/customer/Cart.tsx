@@ -113,7 +113,10 @@ export default function Cart({
   // Calculate applied coupons and surplus according to DRS RN0033, RN0035, RN0036
   const couponAnalysis = useMemo(() => {
     setCouponError(null);
-    const chosen = coupons.filter(c => selectedCouponCodes.includes(c.code));
+    // Preserve selection order by mapping selectedCouponCodes to coupons
+    const chosen = selectedCouponCodes
+      .map(code => coupons.find(c => c.code === code))
+      .filter((c): c is Coupon => c !== undefined);
     
     // Check RN0033: only one promotional coupon
     const promoCount = chosen.filter(c => c.type === 'promocional').length;
