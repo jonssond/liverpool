@@ -72,7 +72,7 @@ export default function OrderHistory({ orders, onUpdateOrderStatus }: OrderHisto
                   <tr key={order.id} className="hover:bg-faded-olive/5 transition" data-cy={`order-row-${order.id}`}>
                     <td className="py-4 font-bold text-vinyl-black" data-cy="order-id">{order.id}</td>
                     <td className="py-4 text-xs text-faded-olive">{order.createdAt}</td>
-                    <td className="py-4 font-bold text-warm-amber" data-cy="order-total">R$ {order.total.toFixed(2)}</td>
+                    <td className="py-4 font-bold text-warm-amber" data-cy="order-total">R$ {Number(order.total).toFixed(2)}</td>
                     <td className="py-4" data-cy="order-status">
                       <StatusBadge status={order.status} />
                     </td>

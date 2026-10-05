@@ -211,7 +211,7 @@ function AppContent() {
             active: true
           };
           setCoupons(prevCoupons => [newCoupon, ...prevCoupons]);
-          alert(`Solicitação Aprovada! Cupom de Troca gerado: ${generatedCouponCode} (R$ ${order.total.toFixed(2)})`);
+          alert(`Solicitação Aprovada! Cupom de Troca gerado: ${generatedCouponCode} (R$ ${Number(order.total).toFixed(2)})`);
         }
         return { ...order, status: newStatus };
       }

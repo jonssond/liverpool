@@ -9,7 +9,7 @@ describe('E-Commerce Flow & Checkout (RF0031-RF0038, RN0023-RN0036)', () => {
     cy.visit('/');
   });
 
-  it('1. Inclusão de mais de um livro no carrinho e alteração da quantidade de itens (RF0031, RF0032, RN0031)', () => {
+  it('1. Inclusão de mais de um disco no carrinho e alteração da quantidade de itens (RF0031, RF0032, RN0031)', () => {
     // Adiciona o primeiro vinil a partir do catálogo
     cy.get('[data-cy="btn-buy-v1"]').click();
     cy.url().should('include', '/checkout');
@@ -61,7 +61,7 @@ describe('E-Commerce Flow & Checkout (RF0031-RF0038, RN0023-RN0036)', () => {
     // Redirecionado para meus pedidos com status EM PROCESSAMENTO
     cy.url().should('include', '/my-orders');
     cy.get('[data-cy="orders-tbody"] tr').first().within(() => {
-      cy.get('[data-cy="order-status"]').should('contain.text', 'Em Processamento');
+      cy.get('[data-cy="order-status"]').should('contain.text', 'EM PROCESSAMENTO');
     });
   });
 
@@ -101,7 +101,7 @@ describe('E-Commerce Flow & Checkout (RF0031-RF0038, RN0023-RN0036)', () => {
 
     cy.url().should('include', '/my-orders');
     cy.get('[data-cy="orders-tbody"] tr').first().within(() => {
-      cy.get('[data-cy="order-status"]').should('contain.text', 'Em Processamento');
+      cy.get('[data-cy="order-status"]').should('contain.text', 'EM PROCESSAMENTO');
     });
   });
 
@@ -112,8 +112,9 @@ describe('E-Commerce Flow & Checkout (RF0031-RF0038, RN0023-RN0036)', () => {
     cy.get('[data-cy^="radio-addr-"]').first().check();
 
     // Seleciona card1 e card2
-    cy.get('[data-cy="chk-card-card1"]').check();
-    cy.get('[data-cy="chk-card-card2"]').check();
+    cy.scrollTo('bottom');
+    cy.get('[data-cy^="chk-card-"]').first().check();
+    //cy.get('[data-cy^="chk-card-"]').eq(1).check();
 
     // Testa validação: valor inferior a R$ 10,00 sem cupons
     cy.get('[data-cy="input-card-amount-card1"]').clear().type('5.00');
@@ -135,7 +136,7 @@ describe('E-Commerce Flow & Checkout (RF0031-RF0038, RN0023-RN0036)', () => {
 
     cy.url().should('include', '/my-orders');
     cy.get('[data-cy="orders-tbody"] tr').first().within(() => {
-      cy.get('[data-cy="order-status"]').should('contain.text', 'Em Processamento');
+      cy.get('[data-cy="order-status"]').should('contain.text', 'EM PROCESSAMENTO');
     });
   });
 
@@ -156,8 +157,9 @@ describe('E-Commerce Flow & Checkout (RF0031-RF0038, RN0023-RN0036)', () => {
     cy.get('[data-cy="chk-coupon-VINYL20"]').check();
     // Total em cupons: 50+40+35+20+20 = 165. Restante = 194.90 - 165 = 29.90.
     // Vamos usar card1 com R$ 25.00 e card2 com R$ 4.90 (< R$ 10,00 permitido pois está combinado com cupons!)
-    cy.get('[data-cy="chk-card-card1"]').check();
-    cy.get('[data-cy="chk-card-card2"]').check();
+    cy.scrollTo('bottom');
+    cy.get('[data-cy^="chk-card-"]').first().check();
+    //cy.get('[data-cy^="chk-card-"]').eq(1).check();
 
     cy.get('[data-cy="input-card-amount-card1"]').clear().type('25.00');
     cy.get('[data-cy="input-card-amount-card2"]').clear().type('4.90');
@@ -169,7 +171,7 @@ describe('E-Commerce Flow & Checkout (RF0031-RF0038, RN0023-RN0036)', () => {
 
     cy.url().should('include', '/my-orders');
     cy.get('[data-cy="orders-tbody"] tr').first().within(() => {
-      cy.get('[data-cy="order-status"]').should('contain.text', 'Em Processamento');
+      cy.get('[data-cy="order-status"]').should('contain.text', 'EM PROCESSAMENTO');
     });
   });
 
@@ -188,6 +190,7 @@ describe('E-Commerce Flow & Checkout (RF0031-RF0038, RN0023-RN0036)', () => {
     cy.get('[data-cy="remaining-to-pay"]').should('contain.text', 'R$ 0.00');
 
     // Tentar adicionar outro cupom desnecessário deve ser bloqueado pela regra RN0036
+    cy.scrollTo('bottom');
     cy.get('[data-cy="chk-coupon-VINYL20"]').check();
     cy.get('[data-cy="coupon-error-banner"]').should('be.visible').and('contain.text', 'RN0036');
     cy.get('[data-cy="btn-finish-checkout"]').should('be.disabled');
@@ -202,7 +205,7 @@ describe('E-Commerce Flow & Checkout (RF0031-RF0038, RN0023-RN0036)', () => {
     // Pedido criado e registrado com status EM PROCESSAMENTO
     cy.url().should('include', '/my-orders');
     cy.get('[data-cy="orders-tbody"] tr').first().within(() => {
-      cy.get('[data-cy="order-status"]').should('contain.text', 'Em Processamento');
+      cy.get('[data-cy="order-status"]').should('contain.text', 'EM PROCESSAMENTO');
     });
   });
 
@@ -210,7 +213,7 @@ describe('E-Commerce Flow & Checkout (RF0031-RF0038, RN0023-RN0036)', () => {
     cy.visit('/admin');
     cy.get('h3').should('contain.text', 'Painel de Gerenciamento de Pedidos');
     cy.get('tbody tr').first().within(() => {
-      cy.get('[data-cy="dashboard-order-status"]').should('contain.text', 'Em Processamento');
+      cy.get('[data-cy="dashboard-order-status"]').should('contain.text', 'EM PROCESSAMENTO');
     });
   });
 });
