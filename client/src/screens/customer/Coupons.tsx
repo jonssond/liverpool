@@ -40,7 +40,7 @@ export default function Coupons({ coupons }: CouponsProps) {
                   <p className="text-[10px] text-faded-olive/80 mt-2">Origem: Devolução de Mercadoria</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-lg font-bold text-warm-amber">R$ {cp.value.toFixed(2)}</p>
+                  <p className="text-lg font-bold text-warm-amber">R$ {Number(cp.value).toFixed(2)}</p>
                   <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${
                     cp.active ? 'bg-emerald-100 text-emerald-800' : 'bg-neutral-200 text-neutral-600'
                   }`}>
@@ -78,7 +78,7 @@ export default function Coupons({ coupons }: CouponsProps) {
                   <p className="text-[10px] text-faded-olive/80 mt-2">Campanha: Liverpool Boas-Vindas</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-lg font-bold text-faded-olive">R$ {cp.value.toFixed(2)}</p>
+                  <p className="text-lg font-bold text-faded-olive">R$ {Number(cp.value).toFixed(2)}</p>
                   <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
                     Ativo
                   </span>

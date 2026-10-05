@@ -65,8 +65,6 @@ export default function Cart({
     pais: 'Brasil',
   });
 
-  // Dynamic Freight calculation based on items count & state (RF0034)
-  // SP: 15.00, Sudeste: 20.00, Sul: 25.00, Demais: 30.00 + 2.50 por disco extra além do 1º
   const currentAddress = useMemo(() => {
     if (showNewAddressForm) return newAddress;
     return customer.addresses.find(a => a.id === selectedAddressId) || customer.addresses[0];
@@ -263,7 +261,7 @@ export default function Cart({
     }
 
     if (!deliveryAddress) {
-      alert('Selecione um endereço de entrega (RF0035).');
+      alert('Selecione um endereço de entrega.');
       return;
     }
 
@@ -351,10 +349,7 @@ export default function Cart({
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 text-left font-sans animate-in fade-in duration-200" data-cy="cart-screen">
       
-      {/* LEFT COLUMN: Shopping Cart List & Delivery Address */}
       <div className="lg:col-span-2 space-y-6">
-        
-        {/* Shopping Cart List (RF0031, RF0032, RN0031) */}
         <div className="bg-white/80 border border-faded-olive/20 rounded-3xl p-6 md:p-8 shadow-sm" data-cy="cart-items-container">
           <div className="flex justify-between items-center mb-6">
             <h3 className="font-serif font-bold text-2xl text-vinyl-black" data-cy="cart-title">
@@ -437,12 +432,11 @@ export default function Cart({
           )}
         </div>
 
-        {/* Address Selection Card (RF0035, RN0023) */}
         {cartItems.length > 0 && (
           <div className="bg-white/80 border border-faded-olive/20 rounded-3xl p-6 md:p-8 shadow-sm" data-cy="address-selection-container">
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h3 className="font-serif font-bold text-xl text-vinyl-black">1. Endereço de Entrega (RF0035)</h3>
+                <h3 className="font-serif font-bold text-xl text-vinyl-black">1. Endereço de Entrega</h3>
                 <p className="text-xs text-faded-olive mt-0.5">Selecione um endereço cadastrado ou cadastre um novo para esta compra.</p>
               </div>
               <button
@@ -541,7 +535,6 @@ export default function Cart({
                   />
                 </div>
 
-                {/* Incorporate to profile option (RF0035) */}
                 <div className="col-span-full pt-2">
                   <label className="flex items-center gap-2 text-xs font-bold text-vinyl-black cursor-pointer bg-warm-amber/5 p-3 rounded-xl border border-warm-amber/20">
                     <input
@@ -551,7 +544,7 @@ export default function Cart({
                       className="accent-warm-amber w-4 h-4"
                       data-cy="chk-save-addr-profile"
                     />
-                    <span>Incorporar este novo endereço ao meu perfil (RF0035)</span>
+                    <span>Incorporar este novo endereço ao meu perfil</span>
                   </label>
                 </div>
               </form>
@@ -601,7 +594,6 @@ export default function Cart({
           <div className="bg-white/80 border border-faded-olive/20 rounded-3xl p-6 md:p-8 shadow-sm">
             <h3 className="font-serif font-bold text-xl text-vinyl-black mb-4">2. Pagamento & Finalização</h3>
             
-            {/* Totals & Freight explanation (RF0034) */}
             <div className="space-y-3 text-sm pb-6 border-b border-faded-olive/10">
               <div className="flex justify-between">
                 <span className="text-faded-olive">Subtotal dos Discos</span>
@@ -617,7 +609,6 @@ export default function Cart({
                 <span className="font-semibold text-vinyl-black" data-cy="cart-freight">R$ {freight.toFixed(2)}</span>
               </div>
 
-              {/* Coupons List Selection (RF0036, RF0037, RN0033, RN0035, RN0036) */}
               <div className="pt-2">
                 <label className="text-xs font-bold text-faded-olive block mb-2">
                   Cupons Disponíveis (Troca e Promocionais)
@@ -693,7 +684,6 @@ export default function Cart({
               </div>
             </div>
 
-            {/* Split Credit Cards payment (RF0036, RN0024, RN0025, RN0034, RN0035) */}
             {couponAnalysis.remainingToPay > 0 && (
               <div className="py-4 space-y-4" data-cy="cards-payment-section">
                 <div className="flex items-center justify-between">
@@ -769,7 +759,7 @@ export default function Cart({
                         className="accent-warm-amber w-4 h-4"
                         data-cy="chk-save-card-profile"
                       />
-                      <span>Incorporar este novo cartão ao meu perfil (RF0036)</span>
+                      <span>Incorporar este novo cartão ao meu perfil</span>
                     </label>
 
                     <Button
@@ -863,7 +853,6 @@ export default function Cart({
               </div>
             </div>
 
-            {/* Checkout Button (RF0038) */}
             <Button
               onClick={handleFinishPurchase}
               disabled={
@@ -876,7 +865,7 @@ export default function Cart({
               className="w-full mt-6"
               data-cy="btn-finish-checkout"
             >
-              Finalizar Compra (RF0038)
+              Finalizar Compra
             </Button>
           </div>
         </div>

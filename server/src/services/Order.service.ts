@@ -74,7 +74,7 @@ export class OrderService {
     }
 
     if (!dto.deliveryAddress) {
-      throw new Error("Endereço de entrega é obrigatório (RF0035).");
+      throw new Error("Endereço de entrega é obrigatório.");
     }
 
     // RF0035 / RN0023: Se optar por salvar endereço no perfil
