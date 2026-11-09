@@ -266,11 +266,17 @@ export class OrderService {
     const orderCount = (await this.orderRepo.findAll()).length;
     const orderId = `PED-${String(orderCount + 1).padStart(3, "0")}`;
 
+    // Map items to ensure category is present
+    const itemsWithCategory = dto.items.map((item: any) => ({
+      ...item,
+      category: item.category || "Diversos",
+    }));
+
     const order = await this.orderRepo.create({
       id: orderId,
       customerId: customer.id,
       customerName: customer.name,
-      items: dto.items,
+      items: itemsWithCategory,
       subtotal: parseFloat(subtotal.toFixed(2)),
       freight: parseFloat(freight.toFixed(2)),
       discount: parseFloat(discount.toFixed(2)),

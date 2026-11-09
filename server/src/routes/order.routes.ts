@@ -26,5 +26,6 @@ orderRouter.get("/customer/:customerId", (req, res) => getOrderController().find
 orderRouter.get("/:id", (req, res) => getOrderController().findById(req, res));
 orderRouter.post("/", (req, res) => getOrderController().create(req, res));
 orderRouter.patch("/:id/status", (req, res) => getOrderController().updateStatus(req, res));
+orderRouter.patch("/:id", (req, res) => getOrderController().updateStatus(req, res));
 
 export { orderRouter };

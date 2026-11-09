@@ -28,6 +28,7 @@ import Coupons from './screens/customer/Coupons';
 import ItemDetails from './screens/customer/ItemDetails';
 import CustomerCrud from './screens/admin/CustomerCrud';
 import Dashboard from './screens/admin/Dashboard';
+import { SalesAnalytics } from './screens/admin/SalesAnalytics';
 import Chatbot from './components/Chatbot';
 import { apiGetCustomers } from './services/customerApi';
 import { apiGetOrders, apiGetCoupons, apiCreateOrder, apiUpdateOrderStatus } from './services/orderApi';
@@ -316,8 +317,16 @@ function AppContent() {
                   Painel Geral
                 </NavLink>
                 <NavLink
+                  to="/admin/sales-analytics"
+                  className={({ isActive }) =>
+                    `px-3 py-2 transition rounded-xl ${isActive ? 'text-warm-amber bg-white/5' : 'text-faded-olive hover:text-paper-white'}`
+                  }
+                >
+                  Análise de Vendas
+                </NavLink>
+                <NavLink
                   to="/admin/customers"
-                  className={({ isActive }) => 
+                  className={({ isActive }) =>
                     `px-3 py-2 transition rounded-xl ${isActive ? 'text-warm-amber bg-white/5' : 'text-faded-olive hover:text-paper-white'}`
                   }
                 >
@@ -368,16 +377,17 @@ function AppContent() {
 
           {/* Admin Routes */}
           <Route path="/admin" element={<Dashboard orders={orders} onUpdateOrderStatus={handleUpdateOrderStatus} />} />
-          <Route 
-            path="/admin/customers" 
+          <Route
+            path="/admin/customers"
             element={
               <CustomerCrud
                 customers={customers}
                 onAddCustomer={handleAddCustomer}
                 onUpdateCustomer={handleUpdateCustomer}
               />
-            } 
+            }
           />
+          <Route path="/admin/sales-analytics" element={<SalesAnalytics />} />
         </Routes>
       </main>
 

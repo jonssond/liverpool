@@ -22,6 +22,7 @@ export class Order {
     vinylId: string;
     title: string;
     artist: string;
+    category: string;
     coverUrl?: string;
     price: number;
     quantity: number;
